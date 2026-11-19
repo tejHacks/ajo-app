@@ -17,7 +17,7 @@ void main() {
   group_tests();
 
   testWidgets('creates nothing and shows empty state on first launch', (tester) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarded': true});
     final store = AjoStore();
     await store.load();
     await tester.pumpWidget(AjoApp(store: store));
@@ -27,7 +27,7 @@ void main() {
   });
 
   testWidgets('group screen shows recipient, pot and payment progress', (tester) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarded': true});
     final store = AjoStore();
     await store.load();
     await store.upsert(group().togglePaid(0, 'a'));

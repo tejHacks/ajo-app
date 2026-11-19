@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'onboarding.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -23,7 +25,15 @@ class AjoApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: theme(Brightness.light),
       darkTheme: theme(Brightness.dark),
-      home: GroupsScreen(store: store),
+      home: OnboardingGate(
+        color: _green,
+        slides: const [
+          Slide(Icons.groups_outlined, 'Run your ajo without the notebook', 'Set up a group, add members in payout order, and Ajo works out every due date.'),
+          Slide(Icons.fact_check_outlined, 'See who has paid at a glance', 'Tick contributions each cycle and know exactly who still owes.'),
+          Slide(Icons.ios_share, 'Share the ledger', 'Send everyone the current cycle and schedule in one tap.'),
+        ],
+        child: GroupsScreen(store: store),
+      ),
     );
   }
 }

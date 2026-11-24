@@ -1,14 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:http/http.dart' as http;
 
 import 'models.dart';
 
 /// The server address. Set at build time with `--dart-define=AJO_API_URL=https://…/api`,
-/// or in the app under Account & sync. 10.0.2.2 is the computer running the API, as
-/// seen from the Android emulator.
-const defaultApiUrl = String.fromEnvironment('AJO_API_URL', defaultValue: 'http://10.0.2.2:8000/api');
+/// or in the app under Account & sync. Without either, it points at a local
+/// `php artisan serve` on this computer: 10.0.2.2 from the Android emulator,
+/// 127.0.0.1 from the iOS simulator.
+const _envApiUrl = String.fromEnvironment('AJO_API_URL');
+
+String get defaultApiUrl {
+  if (_envApiUrl.isNotEmpty) return _envApiUrl;
+  if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8000/api';
+  return 'http://127.0.0.1:8000/api';
+}
 
 /// The signed-in account.
 class Session {

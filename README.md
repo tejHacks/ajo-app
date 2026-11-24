@@ -19,7 +19,17 @@ The phone's copy is always saved first, so Ajo works with no account and no inte
 - If the server already has a newer copy, it answers 409 and the phone keeps the server's version.
 - Signing out keeps your groups on the phone.
 
-The server address comes from `--dart-define=AJO_API_URL=https://your-server/api`, or can be changed in the app. The default, `http://10.0.2.2:8000/api`, reaches a local `php artisan serve --host 0.0.0.0` from the Android emulator. Plain HTTP is allowed only for the emulator and localhost; every other server must use HTTPS.
+The server address comes from `--dart-define=AJO_API_URL=https://your-server/api`, or can be changed in the app. By default it reaches a local `php artisan serve --host 0.0.0.0 --port 8000`: `10.0.2.2` from the Android emulator, `127.0.0.1` from the iOS simulator. Plain HTTP is allowed only for local addresses; every other server must use HTTPS.
+
+### Test sync end to end
+
+With the API running locally:
+
+```bash
+flutter test integration_test/sync_e2e_test.dart -d <simulator or emulator id>
+```
+
+It signs up, makes a group in the real app, syncs it, ticks a payment, and checks both on the server.
 
 ## Next
 

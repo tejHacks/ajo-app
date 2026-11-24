@@ -6,8 +6,20 @@ import 'package:share_plus/share_plus.dart';
 
 import 'models.dart';
 import 'store.dart';
+import 'sync.dart';
+import 'sync_screen.dart';
 
-void main() => runApp(AjoApp(store: AjoStore()..load()));
+void main() {
+  final sync = SyncService();
+  final store = AjoStore(sync: sync);
+  runApp(AjoApp(store: store));
+  // Phone first, then the server: the app is usable before any network call.
+  () async {
+    await sync.load();
+    await store.load();
+    await store.syncNow();
+  }();
+}
 
 const _green = Color(0xFF16A34A);
 final _naira = NumberFormat.currency(locale: 'en_NG', symbol: '₦', decimalDigits: 0);
@@ -50,7 +62,10 @@ class GroupsScreen extends StatelessWidget {
       builder: (context, _) {
         final now = DateTime.now();
         return Scaffold(
-          appBar: AppBar(title: const Text('Ajo', style: TextStyle(fontWeight: FontWeight.w800))),
+          appBar: AppBar(
+            title: const Text('Ajo', style: TextStyle(fontWeight: FontWeight.w800)),
+            actions: [SyncButton(store: store)],
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CreateGroupScreen(store: store))),
             icon: const Icon(Icons.add),

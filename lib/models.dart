@@ -24,6 +24,7 @@ class AjoGroup {
     required this.members,
     Map<int, Set<String>>? paid,
     Set<int>? collected,
+    this.updatedAt,
   })  : paid = paid ?? {},
         collected = collected ?? {};
 
@@ -43,6 +44,9 @@ class AjoGroup {
 
   /// cycles whose pot has been handed to the recipient.
   final Set<int> collected;
+
+  /// When this copy was last changed (UTC). Used to sync: the newer copy wins.
+  final DateTime? updatedAt;
 
   int get cycles => members.length;
   int get pot => amount * members.length;
@@ -85,6 +89,27 @@ class AjoGroup {
     return copyWith(collected: next);
   }
 
+  /// The same group, stamped as changed at [at].
+  AjoGroup touched(DateTime at) => AjoGroup(
+        id: id,
+        name: name,
+        amount: amount,
+        frequency: frequency,
+        start: start,
+        members: members,
+        paid: paid,
+        collected: collected,
+        updatedAt: at.toUtc(),
+      );
+
+  /// True when this copy is newer than [other] (a copy with no stamp is oldest).
+  bool isNewerThan(AjoGroup other) {
+    final a = updatedAt, b = other.updatedAt;
+    if (a == null) return false;
+    if (b == null) return true;
+    return a.isAfter(b);
+  }
+
   AjoGroup copyWith({Map<int, Set<String>>? paid, Set<int>? collected}) => AjoGroup(
         id: id,
         name: name,
@@ -94,6 +119,7 @@ class AjoGroup {
         members: members,
         paid: paid ?? this.paid,
         collected: collected ?? this.collected,
+        updatedAt: updatedAt,
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,6 +131,7 @@ class AjoGroup {
         'members': members.map((m) => m.toJson()).toList(),
         'paid': paid.map((k, v) => MapEntry('$k', v.toList())),
         'collected': collected.toList(),
+        if (updatedAt != null) 'updatedAt': updatedAt!.toUtc().toIso8601String(),
       };
 
   factory AjoGroup.fromJson(Map<String, dynamic> j) => AjoGroup(
@@ -114,7 +141,10 @@ class AjoGroup {
         frequency: Frequency.values.byName(j['frequency'] as String),
         start: DateTime.parse(j['start'] as String),
         members: (j['members'] as List).cast<Map<String, dynamic>>().map(Member.fromJson).toList(),
-        paid: (j['paid'] as Map<String, dynamic>).map((k, v) => MapEntry(int.parse(k), (v as List).cast<String>().toSet())),
+        paid: j['paid'] is Map
+            ? (j['paid'] as Map<String, dynamic>).map((k, v) => MapEntry(int.parse(k), (v as List).cast<String>().toSet()))
+            : <int, Set<String>>{},
         collected: (j['collected'] as List).cast<int>().toSet(),
+        updatedAt: j['updatedAt'] == null ? null : DateTime.parse(j['updatedAt'] as String).toUtc(),
       );
 }
